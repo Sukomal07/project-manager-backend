@@ -5,6 +5,7 @@ import errorMiddleware from './middlewares/error.middleware.js'
 import dotenv from 'dotenv'
 
 import userRoutes from './routes/user.routes.js'
+import taskRoutes from './routes/task.routes.js'
 
 dotenv.config()
 
@@ -20,6 +21,7 @@ app.use(cookieParser())
 
 //routes config
 app.use("/api/v1/user", userRoutes)
+app.use("/api/v1/task", taskRoutes)
 
 app.all("*", (req, res) => {
     res.status(404).json({
