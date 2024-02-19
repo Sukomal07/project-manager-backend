@@ -194,17 +194,11 @@ export const getTasks = asyncHandler(async (req, res) => {
     res.status(200).json(new apiResponse(200, tasks, 'Tasks fatched successfully'));
 })
 
-export const getTaskByStatus = asyncHandler(async (req, res) => {
-    const { status } = req.body;
-
-    if (!status) {
-        throw new apiError(400, 'Status is required')
-    }
-
+export const getBacklogTasks = asyncHandler(async (req, res) => {
     const tasks = await Task.aggregate([
         {
             $match: {
-                status: status,
+                status: 'backlog',
                 createdBy: new mongoose.Types.ObjectId(req.user?._id)
             }
         },
@@ -224,20 +218,111 @@ export const getTaskByStatus = asyncHandler(async (req, res) => {
         }
     ])
 
-    res.status(200).json(new apiResponse(200, tasks, `Tasks fetched successfully`));
+    if (tasks.length === 0) {
+        res.status(200).json(new apiResponse(200, { totalTask: 0, tasks: [] }, `No tasks found`));
+    } else {
+        res.status(200).json(new apiResponse(200, tasks[0], `Tasks fetched successfully`));
+    }
 })
 
-export const getTaskByPriority = asyncHandler(async (req, res) => {
-    const { priority } = req.body;
-
-    if (!priority) {
-        throw new apiError(400, 'priority is required')
-    }
-
+export const getTodoTasks = asyncHandler(async (req, res) => {
     const tasks = await Task.aggregate([
         {
             $match: {
-                priority: priority,
+                status: 'todo',
+                createdBy: new mongoose.Types.ObjectId(req.user?._id)
+            }
+        },
+        {
+            $group: {
+                _id: '$status',
+                totalTask: { $sum: 1 },
+                tasks: { $push: '$$ROOT' }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                totalTask: 1,
+                tasks: 1
+            }
+        }
+    ])
+
+    if (tasks.length === 0) {
+        res.status(200).json(new apiResponse(200, { totalTask: 0, tasks: [] }, `No tasks found`));
+    } else {
+        res.status(200).json(new apiResponse(200, tasks[0], `Tasks fetched successfully`));
+    }
+})
+
+export const getProgressTasks = asyncHandler(async (req, res) => {
+    const tasks = await Task.aggregate([
+        {
+            $match: {
+                status: 'progress',
+                createdBy: new mongoose.Types.ObjectId(req.user?._id)
+            }
+        },
+        {
+            $group: {
+                _id: '$status',
+                totalTask: { $sum: 1 },
+                tasks: { $push: '$$ROOT' }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                totalTask: 1,
+                tasks: 1
+            }
+        }
+    ])
+
+    if (tasks.length === 0) {
+        res.status(200).json(new apiResponse(200, { totalTask: 0, tasks: [] }, `No tasks found`));
+    } else {
+        res.status(200).json(new apiResponse(200, tasks[0], `Tasks fetched successfully`));
+    }
+})
+
+export const getDoneTasks = asyncHandler(async (req, res) => {
+    const tasks = await Task.aggregate([
+        {
+            $match: {
+                status: 'done',
+                createdBy: new mongoose.Types.ObjectId(req.user?._id)
+            }
+        },
+        {
+            $group: {
+                _id: '$status',
+                totalTask: { $sum: 1 },
+                tasks: { $push: '$$ROOT' }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                totalTask: 1,
+                tasks: 1
+            }
+        }
+    ])
+
+    if (tasks.length === 0) {
+        res.status(200).json(new apiResponse(200, { totalTask: 0, tasks: [] }, `No tasks found`));
+    } else {
+        res.status(200).json(new apiResponse(200, tasks[0], `Tasks fetched successfully`));
+    }
+})
+
+export const getHighPriorityTask = asyncHandler(async (req, res) => {
+    const tasks = await Task.aggregate([
+        {
+            $match: {
+                priority: 'high',
                 createdBy: new mongoose.Types.ObjectId(req.user?._id)
             }
         },
@@ -255,13 +340,75 @@ export const getTaskByPriority = asyncHandler(async (req, res) => {
         }
     ])
 
-    res.status(200).json(new apiResponse(200, tasks, `Tasks fetched successfully`));
+    if (tasks.length === 0) {
+        res.status(200).json(new apiResponse(200, { totalTask: 0 }, `No tasks found`));
+    } else {
+        res.status(200).json(new apiResponse(200, tasks[0], `Tasks fetched successfully`));
+    }
+})
+
+export const getLowPriorityTask = asyncHandler(async (req, res) => {
+    const tasks = await Task.aggregate([
+        {
+            $match: {
+                priority: 'low',
+                createdBy: new mongoose.Types.ObjectId(req.user?._id)
+            }
+        },
+        {
+            $group: {
+                _id: '$priority',
+                totalTask: { $sum: 1 }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                totalTask: 1
+            }
+        }
+    ])
+
+    if (tasks.length === 0) {
+        res.status(200).json(new apiResponse(200, { totalTask: 0 }, `No tasks found`));
+    } else {
+        res.status(200).json(new apiResponse(200, tasks[0], `Tasks fetched successfully`));
+    }
+})
+
+export const getModeratePriorityTask = asyncHandler(async (req, res) => {
+    const tasks = await Task.aggregate([
+        {
+            $match: {
+                priority: 'moderate',
+                createdBy: new mongoose.Types.ObjectId(req.user?._id)
+            }
+        },
+        {
+            $group: {
+                _id: '$priority',
+                totalTask: { $sum: 1 }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                totalTask: 1
+            }
+        }
+    ])
+
+    if (tasks.length === 0) {
+        res.status(200).json(new apiResponse(200, { totalTask: 0 }, `No tasks found`));
+    } else {
+        res.status(200).json(new apiResponse(200, tasks[0], `Tasks fetched successfully`));
+    }
 })
 
 export const getOverdueTasksCount = asyncHandler(async (req, res) => {
     const currentDate = new Date();
 
-    const task = await Task.aggregate([
+    const tasks = await Task.aggregate([
         {
             $match: {
                 dueDate: { $lt: currentDate },
@@ -273,7 +420,11 @@ export const getOverdueTasksCount = asyncHandler(async (req, res) => {
         }
     ]);
 
-    res.status(200).json(new apiResponse(200, task[0], 'Count of overdue tasks fetched successfully.'));
+    if (tasks.length === 0) {
+        res.status(200).json(new apiResponse(200, { overdueTasks: 0 }, `No tasks found`));
+    } else {
+        res.status(200).json(new apiResponse(200, tasks[0], `Tasks fetched successfully`));
+    }
 })
 
 export const getTaskById = asyncHandler(async (req, res) => {
