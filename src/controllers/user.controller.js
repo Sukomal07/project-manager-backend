@@ -113,17 +113,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
         throw new apiError(400, "Old password is required to set a new password");
     }
 
-    try {
-        await user.validate();
-    } catch (error) {
-        const validationErrors = [];
-        for (const key in error.errors) {
-            validationErrors.push(error.errors[key].message);
-        }
-        throw new apiError(400, validationErrors.join(', '));
-    }
-
-    await user.save();
+    await user.save({ validateBeforeSave: false });
     user.password = undefined
 
     res.status(200).json(new apiResponse(200, user, "User updated successfully"));
