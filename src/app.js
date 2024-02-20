@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import errorMiddleware from './middlewares/error.middleware.js'
+import { checkTokenValidity } from './middlewares/auth.middleware.js'
 import dotenv from 'dotenv'
 
 import userRoutes from './routes/user.routes.js'
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
 //routes config
+app.get("/api/v1/check", checkTokenValidity)
 app.use("/api/v1/user", userRoutes)
 app.use("/api/v1/task", taskRoutes)
 
