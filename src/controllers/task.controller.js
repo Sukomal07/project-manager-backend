@@ -260,7 +260,7 @@ export const getTasksByPriority = asyncHandler(async (req, res) => {
 
 export const getOverdueTasksCount = asyncHandler(async (req, res) => {
     const currentDate = new Date();
-
+    currentDate.setHours(0, 0, 0, 0);
     const tasks = await Task.aggregate([
         {
             $match: {
