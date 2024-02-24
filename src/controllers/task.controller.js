@@ -272,6 +272,7 @@ export const getOverdueTasksCount = asyncHandler(async (req, res) => {
         {
             $match: {
                 dueDate: { $lt: currentDate },
+                status: { $ne: 'done' },
                 createdBy: new mongoose.Types.ObjectId(req.user?._id)
             }
         },
