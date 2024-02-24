@@ -19,6 +19,13 @@ export const createTask = asyncHandler(async (req, res) => {
         throw new apiError(400, "At least one checklist item is required");
     }
 
+    for (let i = 0; i < checklists.length; i++) {
+        const checklist = checklists[i].name.trim();
+        if (!checklist) {
+            throw new apiError(400, `Checklist ${i + 1} name is required`)
+        }
+    }
+
     let formattedDueDate;
     if (dueDate) {
         const parts = dueDate.split("/");
