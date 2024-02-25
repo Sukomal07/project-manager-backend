@@ -28,6 +28,6 @@ export const checkTokenValidity = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json(
-        new apiResponse(200, isValid, 'authorized')
+        new apiResponse(200, isValid, `authorized ${isValid}`)
     )
 })
